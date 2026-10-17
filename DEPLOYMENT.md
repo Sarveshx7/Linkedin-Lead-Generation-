@@ -20,6 +20,7 @@ The backend now requires database credentials from environment variables; do not
 Configure these on the backend host (or in the local process environment):
 
 - `SUPABASE_DB_URL`: JDBC URL from the Supabase **Session pooler** connection details, in the form `jdbc:postgresql://<pooler-host>:5432/postgres?sslmode=require`.
+- The backend limits its Hikari connection pool to 3 (1 idle) by default to stay within Supabase Session Pooler limits during rolling deploys. `DB_POOL_MAX_SIZE` and `DB_POOL_MIN_IDLE` can override these defaults if needed.
 - `SUPABASE_DB_USER`: pooler database user, typically `postgres.<project-ref>`.
 - `SUPABASE_DB_PASSWORD`: the database password from the Supabase project.
 - `SUPABASE_DB_DRIVER`: optional; defaults to `org.postgresql.Driver`.
