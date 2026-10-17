@@ -134,35 +134,6 @@ export default function SystemSettings({ systemStatus }) {
         </p>
       </div>
 
-      {/* Enabled lead sources */}
-      <div className="p-6 rounded-2xl glass-card border border-slate-800 space-y-4">
-        <div className="border-b border-slate-800/80 pb-3 flex items-center justify-between">
-          <div>
-            <h3 className="text-sm font-bold text-white flex items-center space-x-2">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span>Enabled lead sources</span>
-            </h3>
-            <p className="text-xs text-slate-400">
-              Lead collection is limited to publicly indexed LinkedIn posts returned by these providers.
-            </p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
-          {searchProviders.map((provider) => (
-            <div key={provider.name} className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-white text-xs">{provider.name}</span>
-                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${provider.configured ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-800 text-slate-400'}`}>
-                  {provider.configured ? 'Configured' : 'API key needed'}
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-400">Searches public LinkedIn results using your campaign keywords.</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* Compliance & Anti-Bot Philosophy */}
       <div className="p-6 rounded-2xl glass-card border border-slate-800 space-y-3">
         <h3 className="text-sm font-bold text-white flex items-center space-x-2">
