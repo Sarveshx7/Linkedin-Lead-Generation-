@@ -24,6 +24,11 @@ export const deleteLead = async (id) => {
   await api.delete(`/leads/${id}`);
 };
 
+export const deleteAllLeads = async () => {
+  const response = await api.delete('/leads/all');
+  return response.data;
+};
+
 export const updateLeadStatus = async (id, status, userNotes) => {
   const response = await api.patch(`/leads/${id}/status`, { status, userNotes });
   return response.data;

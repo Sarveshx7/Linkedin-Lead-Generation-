@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -65,6 +66,14 @@ public class LeadController {
             leadRepository.delete(lead);
             return ResponseEntity.noContent().<Void>build();
         }).orElseGet(() -> ResponseEntity.notFound().<Void>build());
+    }
+
+    @DeleteMapping("/all")
+    @Transactional
+    public ResponseEntity<java.util.Map<String, Long>> deleteAllLeads() {
+        long deletedCount = leadRepository.count();
+        leadRepository.deleteAllInBatch();
+        return ResponseEntity.ok(java.util.Map.of("deletedCount", deletedCount));
     }
 
     @PatchMapping("/{id}/status")

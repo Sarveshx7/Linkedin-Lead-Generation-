@@ -22,7 +22,7 @@ import {
   ChevronRight,
   Trash2
 } from 'lucide-react';
-import { getLeads, updateLeadStatus, deleteLead, exportLeadsCsv } from '../api';
+import { getLeads, updateLeadStatus, deleteLead, deleteAllLeads, exportLeadsCsv } from '../api';
 import LeadDetailModal from '../components/LeadDetailModal';
 import { getLeadSourceUrl } from '../utils/sourceLinks';
 
@@ -57,6 +57,7 @@ export default function LeadDiscovery() {
   const [page, setPage] = useState(0);
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'table'
   const [deletingLeadId, setDeletingLeadId] = useState(null);
+  const [isDeletingAll, setIsDeletingAll] = useState(false);
 
   // Selected lead for detail modal
   const [selectedLead, setSelectedLead] = useState(null);
@@ -132,6 +133,26 @@ export default function LeadDiscovery() {
     }
   };
 
+  const handleDeleteAllLeads = async () => {
+    if (!window.confirm('Delete all scanned leads? This permanently removes every lead, including leads outside the current filters. Campaigns and run logs will remain.')) return;
+
+    setIsDeletingAll(true);
+    try {
+      const result = await deleteAllLeads();
+      setLeads([]);
+      setTotalPages(1);
+      setTotalElements(0);
+      setPage(0);
+      setSelectedLead(null);
+      window.alert(`${(result?.deletedCount ?? 0).toLocaleString()} leads deleted.`);
+    } catch (err) {
+      console.error('Failed to delete all leads:', err);
+      window.alert('Could not delete all leads. Please try again.');
+    } finally {
+      setIsDeletingAll(false);
+    }
+  };
+
   const handleExport = () => {
     exportLeadsCsv({
       ...(query ? { query } : {}),
@@ -151,7 +172,7 @@ export default function LeadDiscovery() {
     setCategory('');
     setIntent('');
     setStatus('');
-    setPlatform('');
+    setPlatform('LINKEDIN');
     setIsIndian(false);
     setTimeRange('');
     setPage(0);
@@ -175,7 +196,16 @@ export default function LeadDiscovery() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <button
+            type="button"
+            onClick={handleDeleteAllLeads}
+            disabled={isDeletingAll}
+            className="inline-flex items-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-2.5 text-xs font-semibold text-rose-300 shadow-sm transition-all hover:bg-rose-500/20 disabled:cursor-wait disabled:opacity-50"
+          >
+            <Trash2 className="h-4 w-4" />
+            <span>{isDeletingAll ? 'Deleting…' : 'Delete all leads'}</span>
+          </button>
           <div className="flex items-center bg-slate-900/80 border border-slate-800 rounded-xl p-1" role="group" aria-label="Lead layout">
             <button
               onClick={() => setViewMode('grid')}
