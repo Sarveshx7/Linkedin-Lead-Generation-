@@ -28,7 +28,7 @@ export default function Navbar({ activeTab, setActiveTab, systemStatus, onQuickR
             onClick={() => setActiveTab('dashboard')}
             aria-label="LeadForge dashboard"
           >
-            <div className="h-9 w-24 shrink-0 overflow-hidden rounded-lg border border-slate-200/70 bg-white shadow-sm ring-1 ring-black/5 sm:h-10 sm:w-32">
+            <div className="h-8 w-16 shrink-0 overflow-hidden rounded-lg border border-slate-200/70 bg-white shadow-sm ring-1 ring-black/5 sm:h-10 sm:w-32">
               <img
                 src="/theboredmonkey-logo.png"
                 alt="TheBoredMonkey — Creations & Connections"
@@ -37,9 +37,9 @@ export default function Navbar({ activeTab, setActiveTab, systemStatus, onQuickR
             </div>
             <div>
               <div className="flex items-center space-x-1.5">
-                <span className="font-extrabold text-lg text-white tracking-tight">LeadForge</span>
+                <span className="whitespace-nowrap font-extrabold text-base text-white tracking-tight sm:text-lg">LeadForge</span>
               </div>
-              <p className="text-[10px] text-slate-400 font-medium">Powered by TheBoredMonkey</p>
+              <p className="whitespace-nowrap text-[9px] font-medium text-slate-400 sm:text-[10px]">Powered by TheBoredMonkey</p>
             </div>
           </div>
 
@@ -107,7 +107,7 @@ export default function Navbar({ activeTab, setActiveTab, systemStatus, onQuickR
           </nav>
 
           {/* Right Action & Database Status */}
-          <div className="flex items-center space-x-3">
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
             <button
               type="button"
               onClick={onToggleTheme}
@@ -135,7 +135,8 @@ export default function Navbar({ activeTab, setActiveTab, systemStatus, onQuickR
             <button
               onClick={onQuickRun}
               disabled={isRunning}
-              className={`flex items-center space-x-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shadow-md ${
+              aria-label={isRunning ? 'Collecting leads' : 'Collect leads'}
+              className={`flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-xl text-xs font-bold transition-all shadow-md sm:h-auto sm:w-auto sm:justify-start sm:px-3.5 sm:py-2 ${
                 isRunning
                   ? 'bg-slate-800 text-slate-400 cursor-not-allowed border border-slate-700'
                   : 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white shadow-emerald-500/20 active:scale-95'
@@ -144,18 +145,41 @@ export default function Navbar({ activeTab, setActiveTab, systemStatus, onQuickR
               {isRunning ? (
                 <>
                   <RefreshCw className="w-3.5 h-3.5 animate-spin text-emerald-400" />
-                  <span>Collecting...</span>
+                  <span className="hidden sm:inline">Collecting...</span>
                 </>
               ) : (
                 <>
                   <Play className="w-3.5 h-3.5 fill-current" />
-                  <span>Collect Leads</span>
+                  <span className="hidden sm:inline">Collect Leads</span>
                 </>
               )}
             </button>
           </div>
 
         </div>
+        {/* Compact navigation for phones */}
+        <nav className="-mx-4 flex items-center justify-between gap-1 border-t border-slate-800/70 px-2 py-1 md:hidden" aria-label="Main navigation">
+          {[
+            { id: 'dashboard', label: 'Dashboard', Icon: LayoutDashboard },
+            { id: 'leads', label: 'Leads', Icon: Compass },
+            { id: 'campaigns', label: 'Campaigns', Icon: Sliders },
+            { id: 'history', label: 'Run Logs', Icon: History },
+            { id: 'settings', label: 'Database', Icon: Database },
+          ].map(({ id, label, Icon }) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setActiveTab(id)}
+              aria-current={activeTab === id ? 'page' : undefined}
+              className={`flex min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg px-1 py-1.5 text-[9px] font-semibold transition-colors ${
+                activeTab === id ? 'bg-emerald-500/15 text-emerald-300' : 'text-slate-400 hover:bg-slate-800/60 hover:text-white'
+              }`}
+            >
+              <Icon className="h-4 w-4 shrink-0" />
+              <span className="max-w-full truncate">{label}</span>
+            </button>
+          ))}
+        </nav>
       </div>
     </header>
   );

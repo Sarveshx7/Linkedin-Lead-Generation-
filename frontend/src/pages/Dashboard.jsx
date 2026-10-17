@@ -190,9 +190,9 @@ export default function Dashboard({ stats, systemStatus, onNavigate, onTriggerRu
       </div>
 
       {/* KPI Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
         {/* Total Leads */}
-        <div className="p-5 rounded-2xl glass-card border border-slate-800 space-y-2 hover:border-slate-700 transition-all">
+        <div className="p-3 sm:p-5 rounded-2xl glass-card border border-slate-800 space-y-2 hover:border-slate-700 transition-all">
           <div className="flex items-center justify-between text-slate-400">
             <span className="text-xs font-semibold uppercase tracking-wider">Total Leads</span>
             <Users className="w-4 h-4 text-emerald-400" />
@@ -204,7 +204,7 @@ export default function Dashboard({ stats, systemStatus, onNavigate, onTriggerRu
         </div>
 
         {/* High Intent */}
-        <div className="p-5 rounded-2xl glass-card border border-slate-800 space-y-2 hover:border-rose-500/30 transition-all">
+        <div className="p-3 sm:p-5 rounded-2xl glass-card border border-slate-800 space-y-2 hover:border-rose-500/30 transition-all">
           <div className="flex items-center justify-between text-slate-400">
             <span className="text-xs font-semibold uppercase tracking-wider text-rose-300">High Intent</span>
             <Flame className="w-4 h-4 text-rose-400" />
@@ -216,7 +216,7 @@ export default function Dashboard({ stats, systemStatus, onNavigate, onTriggerRu
         </div>
 
         {/* Indian Market */}
-        <div className="p-5 rounded-2xl glass-card border border-slate-800 space-y-2 hover:border-amber-500/30 transition-all">
+        <div className="p-3 sm:p-5 rounded-2xl glass-card border border-slate-800 space-y-2 hover:border-amber-500/30 transition-all">
           <div className="flex items-center justify-between text-slate-400">
             <span className="text-xs font-semibold uppercase tracking-wider text-amber-300">Indian Market</span>
           </div>
@@ -227,7 +227,7 @@ export default function Dashboard({ stats, systemStatus, onNavigate, onTriggerRu
         </div>
 
         {/* Shortlisted */}
-        <div className="p-5 rounded-2xl glass-card border border-slate-800 space-y-2 hover:border-teal-500/30 transition-all">
+        <div className="p-3 sm:p-5 rounded-2xl glass-card border border-slate-800 space-y-2 hover:border-teal-500/30 transition-all">
           <div className="flex items-center justify-between text-slate-400">
             <span className="text-xs font-semibold uppercase tracking-wider text-teal-300">Shortlisted</span>
             <CheckCircle className="w-4 h-4 text-teal-400" />
@@ -239,7 +239,7 @@ export default function Dashboard({ stats, systemStatus, onNavigate, onTriggerRu
         </div>
 
         {/* Active Campaigns */}
-        <div className="p-5 rounded-2xl glass-card border border-slate-800 space-y-2 hover:border-slate-700 transition-all">
+        <div className="col-span-2 p-3 sm:col-span-1 sm:p-5 rounded-2xl glass-card border border-slate-800 space-y-2 hover:border-slate-700 transition-all">
           <div className="flex items-center justify-between text-slate-400">
             <span className="text-xs font-semibold uppercase tracking-wider">Campaigns</span>
             <Sliders className="w-4 h-4 text-slate-300" />
