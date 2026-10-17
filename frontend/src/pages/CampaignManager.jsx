@@ -29,7 +29,7 @@ export default function CampaignManager({ onTriggerRun }) {
     keywords: '',
     excludedKeywords: '',
     targetIndianMarket: true,
-    enabledSources: 'HACKER_NEWS,DEV_TO,GITHUB,RSS_FEED',
+    enabledSources: 'LINKEDIN',
     customRssFeeds: '',
     isActive: true,
   });
@@ -58,7 +58,7 @@ export default function CampaignManager({ onTriggerRun }) {
       keywords: '',
       excludedKeywords: '',
       targetIndianMarket: true,
-      enabledSources: 'LINKEDIN,HACKER_NEWS,DEV_TO,GITHUB,RSS_FEED',
+      enabledSources: 'LINKEDIN',
       customRssFeeds: '',
       isActive: true,
     });
@@ -73,7 +73,7 @@ export default function CampaignManager({ onTriggerRun }) {
       keywords: camp.keywords || '',
       excludedKeywords: camp.excludedKeywords || '',
       targetIndianMarket: Boolean(camp.targetIndianMarket),
-      enabledSources: camp.enabledSources || 'HACKER_NEWS,DEV_TO,GITHUB,RSS_FEED',
+      enabledSources: 'LINKEDIN',
       customRssFeeds: camp.customRssFeeds || '',
       isActive: camp.isActive ?? true,
     });
@@ -202,7 +202,7 @@ export default function CampaignManager({ onTriggerRun }) {
 
                 {/* Channels */}
                 <div className="pt-1 flex items-center justify-between text-xs text-slate-400">
-                  <span>Channels: <strong className="text-slate-300">{camp.enabledSources}</strong></span>
+                  <span>Search: <strong className="text-slate-300">LinkedIn via Tavily, Exa &amp; Serper</strong></span>
                   <span>Last Run: <strong className="text-slate-300">{camp.lastRunAt ? new Date(camp.lastRunAt).toLocaleTimeString() : 'Never'}</strong></span>
                 </div>
               </div>

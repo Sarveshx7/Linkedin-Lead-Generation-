@@ -49,7 +49,7 @@ export default function LeadDiscovery() {
   const [category, setCategory] = useState('');
   const [intent, setIntent] = useState('');
   const [status, setStatus] = useState('');
-  const [platform, setPlatform] = useState('');
+  const [platform, setPlatform] = useState('LINKEDIN');
   const [isIndian, setIsIndian] = useState(false);
   const [timeRange, setTimeRange] = useState(''); // '24h', 'week', 'month'
   const [sortBy, setSortBy] = useState('intentLevel');
@@ -305,13 +305,7 @@ export default function LeadDiscovery() {
             onChange={(e) => { setPlatform(e.target.value); setPage(0); }}
             className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-emerald-500"
           >
-            <option value="">All Platforms</option>
             <option value="LINKEDIN">LinkedIn (Posts & RFPs)</option>
-            <option value="HACKER_NEWS">Hacker News</option>
-            <option value="DEV_TO">Dev.to</option>
-            <option value="GITHUB">GitHub Issues</option>
-            <option value="RSS_FEED">RSS Feeds</option>
-            <option value="REDDIT">Reddit</option>
           </select>
 
           {/* Sorting */}

@@ -27,7 +27,7 @@ public class Campaign {
     private Boolean targetIndianMarket = true;
 
     @Column(columnDefinition = "TEXT", nullable = false)
-    private String enabledSources = "HACKER_NEWS,DEV_TO,GITHUB,RSS_FEED";
+    private String enabledSources = "LINKEDIN";
 
     @Column(columnDefinition = "TEXT")
     private String customRssFeeds;

@@ -134,64 +134,32 @@ export default function SystemSettings({ systemStatus }) {
         </p>
       </div>
 
-      {/* Authorized Collectors Status */}
+      {/* Enabled lead sources */}
       <div className="p-6 rounded-2xl glass-card border border-slate-800 space-y-4">
         <div className="border-b border-slate-800/80 pb-3 flex items-center justify-between">
           <div>
             <h3 className="text-sm font-bold text-white flex items-center space-x-2">
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span>Other Data Ingestion Adapters</span>
+              <span>Enabled lead sources</span>
             </h3>
             <p className="text-xs text-slate-400">
-              Public APIs and open syndication feeds run when enabled for a campaign
+              Lead collection is limited to publicly indexed LinkedIn posts returned by these providers.
             </p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-          {/* HackerNews */}
-          <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="font-bold text-white text-xs">Hacker News Algolia Search API</span>
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400">Authorized</span>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
+          {searchProviders.map((provider) => (
+            <div key={provider.name} className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-white text-xs">{provider.name}</span>
+                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${provider.configured ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-800 text-slate-400'}`}>
+                  {provider.configured ? 'Configured' : 'API key needed'}
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-400">Searches public LinkedIn results using your campaign keywords.</p>
             </div>
-            <p className="text-[11px] text-slate-400">
-              Official public search API querying real-time hiring threads, monthly "Who is Hiring", and contract proposals.
-            </p>
-          </div>
-
-          {/* Dev.to */}
-          <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="font-bold text-white text-xs">Dev.to Syndication API & Feeds</span>
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400">Authorized</span>
-            </div>
-            <p className="text-[11px] text-slate-400">
-              RSS/Atom feeds and official REST endpoints for `#hiring`, `#freelance`, and Indian developer initiatives.
-            </p>
-          </div>
-
-          {/* GitHub Search API */}
-          <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="font-bold text-white text-xs">GitHub Public Search API</span>
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400">Authorized</span>
-            </div>
-            <p className="text-[11px] text-slate-400">
-              Official REST API searching public repository issues and RFPs with rate-limit header monitoring.
-            </p>
-          </div>
-
-          {/* RSS Engine & Google Alerts */}
-          <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="font-bold text-white text-xs">Syndication Engine & Google Alerts</span>
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400">Authorized</span>
-            </div>
-            <p className="text-[11px] text-slate-400">
-              Ingests curated job feeds (WeWorkRemotely, RemoteOK) and custom Google Alerts RSS feeds for Indian keywords.
-            </p>
-          </div>
+          ))}
         </div>
       </div>
 
@@ -207,7 +175,7 @@ export default function SystemSettings({ systemStatus }) {
         <ul className="text-xs text-slate-400 space-y-2 list-disc list-inside">
           <li><strong>No CAPTCHA Circumvention:</strong> Channels that require CAPTCHAs or Cloudflare challenge pages are not scraped without API credentials.</li>
           <li><strong>Rate Limit Backoff:</strong> All collectors maintain token pacing and honor HTTP 429 backoff headers.</li>
-          <li><strong>Channel Isolation:</strong> A failure or rate-limit on one source does not crash the pipeline; other sources finish gracefully.</li>
+          <li><strong>Provider comparison:</strong> Results from Tavily, Exa, and Serper are merged and deduplicated by exact LinkedIn post URL.</li>
           <li><strong>Deduplication Fingerprinting:</strong> Canonical URLs and content hashing (SHA-256) ensure clean database records without redundant entries.</li>
         </ul>
       </div>

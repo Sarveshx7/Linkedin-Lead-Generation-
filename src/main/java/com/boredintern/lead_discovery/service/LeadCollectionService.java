@@ -247,14 +247,9 @@ public class LeadCollectionService {
                 logger.info("Collecting campaign: " + campaign.getName());
             }
 
-            Set<String> enabledPlatforms = new HashSet<>();
-            if (campaign != null && campaign.getEnabledSources() != null) {
-                for (String source : campaign.getEnabledSources().split(",")) {
-                    if (!source.isBlank()) {
-                        enabledPlatforms.add(source.trim().toUpperCase(Locale.ROOT));
-                    }
-                }
-            }
+            // Restrict collection to public LinkedIn results returned by Tavily, Exa,
+            // and Serper, even if an older campaign record lists other sources.
+            Set<String> enabledPlatforms = Set.of("LINKEDIN");
 
             for (LeadSourceCollector collector : collectors) {
                 String platformName = collector.getPlatform().name();

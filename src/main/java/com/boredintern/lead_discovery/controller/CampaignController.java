@@ -38,6 +38,8 @@ public class CampaignController {
     @PostMapping
     public ResponseEntity<Campaign> createCampaign(@RequestBody Campaign campaign) {
         campaign.setCreatedAt(Instant.now());
+        campaign.setEnabledSources("LINKEDIN");
+        campaign.setCustomRssFeeds(null);
         if (campaign.getIsActive() == null) {
             campaign.setIsActive(true);
         }
@@ -52,8 +54,8 @@ public class CampaignController {
             campaign.setKeywords(campaignDetails.getKeywords());
             campaign.setExcludedKeywords(campaignDetails.getExcludedKeywords());
             campaign.setTargetIndianMarket(campaignDetails.getTargetIndianMarket());
-            campaign.setEnabledSources(campaignDetails.getEnabledSources());
-            campaign.setCustomRssFeeds(campaignDetails.getCustomRssFeeds());
+            campaign.setEnabledSources("LINKEDIN");
+            campaign.setCustomRssFeeds(null);
             if (campaignDetails.getIsActive() != null) {
                 campaign.setIsActive(campaignDetails.getIsActive());
             }
