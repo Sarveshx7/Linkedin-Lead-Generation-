@@ -1,5 +1,7 @@
 # LeadForge
 
+Application: https://leadforge-frontend.vercel.app
+
 LeadForge is a campaign-based lead discovery dashboard by TheBoredMonkey. Its LinkedIn workflow searches public search indexes through Tavily, Exa, and Serper, then stores qualified result records in PostgreSQL (configured for Supabase in deployment).
 
 ## What the LinkedIn collector does
