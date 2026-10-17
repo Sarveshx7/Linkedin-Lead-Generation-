@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/+$/, '');
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: apiBaseUrl,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -34,7 +36,7 @@ export const exportLeadsCsv = (params = {}) => {
       searchParams.append(key, val);
     }
   });
-  window.open(`/api/leads/export?${searchParams.toString()}`, '_blank');
+  window.open(`${apiBaseUrl}/leads/export?${searchParams.toString()}`, '_blank', 'noopener,noreferrer');
 };
 
 // Campaigns API
