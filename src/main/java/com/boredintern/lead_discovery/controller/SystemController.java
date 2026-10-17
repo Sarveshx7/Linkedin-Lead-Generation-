@@ -60,15 +60,16 @@ public class SystemController {
         // Collectors status
         List<Map<String, Object>> collectorList = new ArrayList<>();
         for (LeadSourceCollector c : collectors) {
+            if (c.getPlatform() != com.boredintern.lead_discovery.model.SourcePlatform.LINKEDIN) {
+                continue;
+            }
             Map<String, Object> cInfo = new LinkedHashMap<>();
             cInfo.put("platform", c.getPlatform().name());
             cInfo.put("available", c.isAvailable());
             cInfo.put("configured", c.isAvailable());
-            if (c.getPlatform() == com.boredintern.lead_discovery.model.SourcePlatform.LINKEDIN) {
-                cInfo.put("accessMethod", "PUBLIC_SEARCH_INDEX");
-                if (c instanceof LinkedInCollector linkedInCollector) {
-                    cInfo.put("searchProviders", linkedInCollector.getProviderStatuses());
-                }
+            cInfo.put("accessMethod", "PUBLIC_SEARCH_INDEX");
+            if (c instanceof LinkedInCollector linkedInCollector) {
+                cInfo.put("searchProviders", linkedInCollector.getProviderStatuses());
             }
             collectorList.add(cInfo);
         }
