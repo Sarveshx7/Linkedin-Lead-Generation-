@@ -26,7 +26,7 @@ public class LeadCollectionService {
 
     private static final Map<String, String> DEFAULT_LINKEDIN_KEYWORDS = Map.of(
             "LinkedIn: Influencer Marketing Leads",
-            "looking for a content creator, looking for content creators, looking for an influencer, looking for influencers, brand collab, creator partnership, UGC creator, social media creator, paid partnership, sponsored content, brand ambassador, influencer campaign",
+            "looking for a content creator, looking for content creators, looking for an influencer, looking for influencers, brand collab, creator partnership, social media creator, paid partnership, sponsored content, brand ambassador, influencer campaign",
             "LinkedIn: Advertising & Creative Leads",
             "looking for an advertising agency, looking for a creative agency, social media advertising, advertising campaign, brand campaign, creative agency RFP, digital marketing agency, paid media campaign, campaign partner, brand collaboration, promotional campaign, pitch invited",
             "LinkedIn: Production House Leads",
@@ -45,6 +45,9 @@ public class LeadCollectionService {
             "LinkedIn: Brand Film Leads",
             "brand film, produce a brand film, corporate film, product commercial, creative team brand film, TVC, brand video"
     );
+
+    private static final String PREVIOUS_DEFAULT_INFLUENCER_KEYWORDS =
+            "looking for a content creator, looking for content creators, looking for an influencer, looking for influencers, brand collab, creator partnership, UGC creator, social media creator, paid partnership, sponsored content, brand ambassador, influencer campaign";
 
     private final List<LeadSourceCollector> collectors;
     private final LeadRepository leadRepository;
@@ -187,8 +190,14 @@ public class LeadCollectionService {
         for (Campaign campaign : campaignRepository.findAll()) {
             String campaignName = campaign.getName();
             if (campaignName == null) continue;
-            String previousDefaults = LEGACY_LINKEDIN_KEYWORDS.get(campaignName);
             String updatedDefaults = DEFAULT_LINKEDIN_KEYWORDS.get(campaignName);
+            if ("LinkedIn: Influencer Marketing Leads".equals(campaignName)
+                    && PREVIOUS_DEFAULT_INFLUENCER_KEYWORDS.equals(campaign.getKeywords())) {
+                campaign.setKeywords(updatedDefaults);
+                campaignRepository.save(campaign);
+                continue;
+            }
+            String previousDefaults = LEGACY_LINKEDIN_KEYWORDS.get(campaignName);
             if (previousDefaults != null && updatedDefaults != null
                     && previousDefaults.equals(campaign.getKeywords())) {
                 campaign.setKeywords(updatedDefaults);
@@ -234,6 +243,7 @@ public class LeadCollectionService {
 
         int discovered = 0;
         int duplicates = 0;
+        int outsideIndiaSkipped = 0;
         int sourcesCount = 0;
         boolean hadErrors = false;
 
@@ -289,6 +299,10 @@ public class LeadCollectionService {
                             CategorizationService.CategorizationResult cat = categorizationService.analyze(
                                     cleanTitle, cleanContent, raw.author(), canonicalUrl, raw.location()
                             );
+                            if (!cat.isIndianMarket()) {
+                                outsideIndiaSkipped++;
+                                continue;
+                            }
                             String contactInfo = sanitizationService.extractContactInfo(cleanContent);
 
                             Lead lead = new Lead();
@@ -345,6 +359,11 @@ public class LeadCollectionService {
         run.setSourcesAttempted(sourcesCount);
         run.setErrorLogs(logger.getFormattedLogs());
         run.setStatus(hadErrors ? (discovered > 0 ? RunStatus.PARTIAL_SUCCESS : RunStatus.FAILED) : RunStatus.COMPLETED);
+
+        if (outsideIndiaSkipped > 0) {
+            logger.info("Excluded " + outsideIndiaSkipped + " post(s) without explicit India-related location or market wording.");
+            run.setErrorLogs(logger.getFormattedLogs());
+        }
 
         logger.info(String.format("Run completed. Discovered: %d, Duplicates: %d, Status: %s",
                 discovered, duplicates, run.getStatus()));

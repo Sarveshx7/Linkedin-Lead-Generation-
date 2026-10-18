@@ -194,13 +194,13 @@ export default function Dashboard({ stats, systemStatus, onNavigate, onTriggerRu
         {/* Total Leads */}
         <div className="p-3 sm:p-5 rounded-2xl glass-card border border-slate-800 space-y-2 hover:border-slate-700 transition-all">
           <div className="flex items-center justify-between text-slate-400">
-            <span className="text-xs font-semibold uppercase tracking-wider">Total Leads</span>
+            <span className="text-xs font-semibold uppercase tracking-wider">Fresh Leads · 7 Days</span>
             <Users className="w-4 h-4 text-emerald-400" />
           </div>
           <div className="text-2xl sm:text-3xl font-extrabold text-white">
             <CountUp value={totalLeads} />
           </div>
-          <p className="text-[11px] text-slate-400">Deduplicated across channels</p>
+          <p className="text-[11px] text-slate-400">Posts with a provider-reported date</p>
         </div>
 
         {/* High Intent */}
@@ -218,12 +218,12 @@ export default function Dashboard({ stats, systemStatus, onNavigate, onTriggerRu
         {/* Indian Market */}
         <div className="p-3 sm:p-5 rounded-2xl glass-card border border-slate-800 space-y-2 hover:border-amber-500/30 transition-all">
           <div className="flex items-center justify-between text-slate-400">
-            <span className="text-xs font-semibold uppercase tracking-wider text-amber-300">Indian Market</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-amber-300">India Signals</span>
           </div>
           <div className="text-2xl sm:text-3xl font-extrabold text-amber-400">
             <CountUp value={indianLeads} />
           </div>
-          <p className="text-[11px] text-slate-400">Bengaluru, NCR, INR, Indian firms</p>
+          <p className="text-[11px] text-slate-400">Explicit post wording; author location is not verified</p>
         </div>
 
         {/* Shortlisted */}
@@ -421,7 +421,7 @@ export default function Dashboard({ stats, systemStatus, onNavigate, onTriggerRu
                   <th className="px-4 py-3">Title &amp; Requirement</th>
                   <th className="px-3 py-3">Category</th>
                   <th className="px-3 py-3">Intent</th>
-                  <th className="px-3 py-3">India</th>
+                  <th className="px-3 py-3">India signal</th>
                   <th className="px-3 py-3">Platform</th>
                   <th className="px-3 py-3">Date</th>
                   <th className="px-4 py-3 text-right">Actions</th>
@@ -430,7 +430,7 @@ export default function Dashboard({ stats, systemStatus, onNavigate, onTriggerRu
               <tbody className="divide-y divide-slate-800/60">
                 {filteredLeads.slice(0, 9).map((lead) => {
                   const rowLead = leadStatusUpdates[lead.id] || lead;
-                  const leadDate = rowLead.publishedAt || rowLead.discoveredAt;
+                  const leadDate = rowLead.publishedAt;
                   return (
                     <tr
                       key={rowLead.id}
@@ -461,8 +461,8 @@ export default function Dashboard({ stats, systemStatus, onNavigate, onTriggerRu
                       </td>
                       <td className="px-3 py-3">
                         {rowLead.isIndianMarket
-                          ? <span className="font-bold text-amber-400">Yes</span>
-                          : <span className="text-slate-500">Global</span>}
+                          ? <span title="Explicit India-related wording in post; author location is not verified" className="font-bold text-amber-400">Yes</span>
+                          : <span className="text-slate-500">No signal</span>}
                       </td>
                       <td className="px-3 py-3 font-mono text-slate-400">{rowLead.sourcePlatform || '—'}</td>
                       <td className="px-3 py-3 text-slate-400">

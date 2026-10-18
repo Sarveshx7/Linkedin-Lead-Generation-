@@ -72,7 +72,7 @@ export default function CampaignManager({ onTriggerRun }) {
       description: camp.description || '',
       keywords: camp.keywords || '',
       excludedKeywords: camp.excludedKeywords || '',
-      targetIndianMarket: Boolean(camp.targetIndianMarket),
+      targetIndianMarket: true,
       enabledSources: 'LINKEDIN',
       customRssFeeds: camp.customRssFeeds || '',
       isActive: camp.isActive ?? true,
@@ -82,11 +82,12 @@ export default function CampaignManager({ onTriggerRun }) {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    const campaignData = { ...formData, targetIndianMarket: true };
     try {
       if (editingCampaign) {
-        await updateCampaign(editingCampaign.id, formData);
+        await updateCampaign(editingCampaign.id, campaignData);
       } else {
-        await createCampaign(formData);
+        await createCampaign(campaignData);
       }
       setIsModalOpen(false);
       loadCampaigns();
@@ -291,12 +292,13 @@ export default function CampaignManager({ onTriggerRun }) {
                 <label className="block text-slate-300 font-semibold mb-1">Keywords (comma-separated)</label>
                 <textarea
                   rows={2}
+                  required
                   value={formData.keywords}
                   onChange={(e) => setFormData({ ...formData, keywords: e.target.value })}
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200 focus:outline-none focus:border-emerald-500"
                 />
                 <span className="text-[10px] text-slate-400 block mt-1">
-                  Leave blank to use the default search terms for the campaign type.
+                  Only these keywords are searched; there are no hidden campaign-type keywords. Results also need an explicit India signal and a provider date within seven days.
                 </span>
               </div>
 
@@ -311,14 +313,14 @@ export default function CampaignManager({ onTriggerRun }) {
               </div>
 
               <div className="flex items-center space-x-6 pt-2">
-                <label className="flex items-center space-x-2 cursor-pointer">
+                <label className="flex items-center space-x-2 cursor-not-allowed">
                   <input
                     type="checkbox"
-                    checked={formData.targetIndianMarket}
-                    onChange={(e) => setFormData({ ...formData, targetIndianMarket: e.target.checked })}
+                    checked
+                    disabled
                     className="rounded bg-slate-800 border-slate-700 text-amber-500 focus:ring-0"
                   />
-                  <span className="font-semibold text-white">Target Indian Market (Boost India Relevance)</span>
+                  <span className="font-semibold text-white">India-only targeting (required)</span>
                 </label>
 
                 <label className="flex items-center space-x-2 cursor-pointer">

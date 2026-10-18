@@ -49,7 +49,7 @@ export default function LeadDetailModal({ lead, onClose, onUpdateStatus }) {
 
               {lead.isIndianMarket && (
                 <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">
-                  India market match
+                  India post signal
                 </span>
               )}
 
@@ -99,6 +99,12 @@ export default function LeadDetailModal({ lead, onClose, onUpdateStatus }) {
                 <div className="flex items-center space-x-1 font-semibold text-slate-200 truncate">
                   <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                   <span className="truncate">{lead.location}</span>
+                </div>
+              </div>}
+              {isIndexedLinkedIn && <div>
+                <span className="text-slate-400 block mb-1">India market signal</span>
+                <div className="font-semibold text-slate-200">
+                  {lead.isIndianMarket ? 'Explicit India-related wording in post; author location is not verified' : 'No explicit India-related wording found'}
                 </div>
               </div>}
               {lead.publishedAt && <div>

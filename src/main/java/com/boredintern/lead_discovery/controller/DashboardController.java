@@ -8,6 +8,10 @@ import com.boredintern.lead_discovery.model.SourcePlatform;
 import com.boredintern.lead_discovery.repository.CampaignRepository;
 import com.boredintern.lead_discovery.repository.CollectionRunRepository;
 import com.boredintern.lead_discovery.repository.LeadRepository;
+import com.boredintern.lead_discovery.repository.LeadSpecification;
+import com.boredintern.lead_discovery.dto.LeadFilterRequest;
+import com.boredintern.lead_discovery.model.Lead;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,40 +43,33 @@ public class DashboardController {
 
     @GetMapping("/stats")
     public ResponseEntity<DashboardStatsDto> getStats() {
-        long totalLeads = leadRepository.count();
-        long highIntentLeads = leadRepository.countByIntentLevel(IntentLevel.HIGH);
-        long indianMarketLeads = leadRepository.countByIsIndianMarket(true);
-        long shortlistedLeads = leadRepository.countByReviewStatus(ReviewStatus.SHORTLISTED);
+        LeadFilterRequest freshFilter = new LeadFilterRequest();
+        freshFilter.setIsIndian(true);
+        List<Lead> freshLeads = leadRepository.findAll(
+                LeadSpecification.withFilters(freshFilter), Sort.by(Sort.Direction.DESC, "publishedAt"));
+        long totalLeads = freshLeads.size();
+        long highIntentLeads = freshLeads.stream().filter(lead -> lead.getIntentLevel() == IntentLevel.HIGH).count();
+        long indianMarketLeads = freshLeads.stream().filter(lead -> Boolean.TRUE.equals(lead.getIsIndianMarket())).count();
+        long shortlistedLeads = freshLeads.stream().filter(lead -> lead.getReviewStatus() == ReviewStatus.SHORTLISTED).count();
         long activeCampaigns = campaignRepository.findByIsActiveTrue().size();
         long totalRuns = collectionRunRepository.count();
 
         Map<String, Long> categoryCounts = new LinkedHashMap<>();
-        for (Object[] row : leadRepository.countGroupByServiceCategory()) {
-            if (row[0] != null) {
-                categoryCounts.put(row[0].toString(), (Long) row[1]);
-            }
-        }
+        freshLeads.stream().map(Lead::getServiceCategory).filter(java.util.Objects::nonNull)
+                .forEach(category -> categoryCounts.merge(category.name(), 1L, Long::sum));
 
         Map<String, Long> intentCounts = new LinkedHashMap<>();
-        for (Object[] row : leadRepository.countGroupByIntentLevel()) {
-            if (row[0] != null) {
-                intentCounts.put(row[0].toString(), (Long) row[1]);
-            }
-        }
+        freshLeads.stream().map(Lead::getIntentLevel).filter(java.util.Objects::nonNull)
+                .forEach(intent -> intentCounts.merge(intent.name(), 1L, Long::sum));
 
         Map<String, Long> platformCounts = new LinkedHashMap<>();
-        for (Object[] row : leadRepository.countGroupBySourcePlatform()) {
-            if (row[0] != null) {
-                platformCounts.put(row[0].toString(), (Long) row[1]);
-            }
-        }
+        freshLeads.stream().map(Lead::getSourcePlatform).filter(java.util.Objects::nonNull)
+                .forEach(platform -> platformCounts.merge(platform.name(), 1L, Long::sum));
 
         List<CollectionRun> recentRuns = collectionRunRepository.findTop50ByOrderByStartTimeDesc();
-        List<com.boredintern.lead_discovery.model.Lead> recentLeads =
-                leadRepository.findTop25ByIntentLevelAndSourcePlatformOrderByDiscoveredAtDesc(
-                        IntentLevel.HIGH,
-                        SourcePlatform.LINKEDIN
-                );
+        List<Lead> recentLeads = freshLeads.stream()
+                .filter(lead -> lead.getIntentLevel() == IntentLevel.HIGH && lead.getSourcePlatform() == SourcePlatform.LINKEDIN)
+                .limit(25).toList();
 
         return ResponseEntity.ok(new DashboardStatsDto(
                 totalLeads,

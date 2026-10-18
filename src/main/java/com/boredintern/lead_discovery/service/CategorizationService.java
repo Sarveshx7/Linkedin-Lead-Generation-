@@ -5,18 +5,20 @@ import com.boredintern.lead_discovery.model.ServiceCategory;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class CategorizationService {
 
-    private static final List<String> INDIAN_LOCATIONS = List.of(
-            "india", "indian", "mumbai", "delhi", "ncr", "gurgaon", "gurugram", "noida",
-            "bangalore", "bengaluru", "hyderabad", "pune", "chennai", "kolkata",
-            "ahmedabad", "jaipur", "kochi", "kerala", "goa", "chandigarh", "indore"
-    );
-
-    private static final List<String> INDIAN_CURRENCIES = List.of(
-            "inr", "₹", "rs.", "rs ", "rupee", "rupees", "lakh", "lakhs", "crore", "crores", "lpa", "gst"
+    private static final Pattern INDIA_MARKET_SIGNAL = Pattern.compile(
+            "\\b(?:india[- ]based|(?:mumbai|delhi|new delhi|ncr|gurgaon|gurugram|noida|bangalore|bengaluru|hyderabad|pune|chennai|kolkata|ahmedabad|jaipur|kochi|kerala|goa|chandigarh|indore|tamil nadu|karnataka|telangana|andhra pradesh)[- ]based|"
+                    + "indian (?:market|audience|consumers?|brands?|customers?)|india (?:market|campaign|launch|audience)|"
+                    + "(?:based|located|headquartered|launching|campaign|available|operating|shipping|targeting|serving)\\s+(?:in|across|throughout|for)\\s+(?:the\\s+)?india|"
+                    + "(?:in|across|throughout|within|from|targeting|serving)\\s+(?:the\\s+)?india|"
+                    + "(?:in|across|from|within)\\s+(?:mumbai|delhi|new delhi|ncr|gurgaon|gurugram|noida|bangalore|bengaluru|hyderabad|pune|chennai|kolkata|ahmedabad|jaipur|kochi|kerala|goa|chandigarh|indore)|"
+                    + "(?:based|located|headquartered|campaign|shoot|launch|event|available|operating)\\s+in\\s+(?:mumbai|delhi|new delhi|ncr|gurgaon|gurugram|noida|bangalore|bengaluru|hyderabad|pune|chennai|kolkata|ahmedabad|jaipur|kochi|kerala|goa|chandigarh|indore|tamil nadu|karnataka|telangana|andhra pradesh))\\b",
+            Pattern.CASE_INSENSITIVE
     );
 
     private static final Map<ServiceCategory, List<String>> CATEGORY_KEYWORDS = new EnumMap<>(ServiceCategory.class);
@@ -148,22 +150,9 @@ public class CategorizationService {
         }
 
         // 3. Indian Market Detection
-        boolean isIndian = false;
-        List<String> indianMatches = new ArrayList<>();
-        for (String loc : INDIAN_LOCATIONS) {
-            if (fullText.contains(loc)) {
-                isIndian = true;
-                indianMatches.add(loc);
-            }
-        }
-        for (String curr : INDIAN_CURRENCIES) {
-            if (fullText.contains(curr)) {
-                isIndian = true;
-                indianMatches.add(curr);
-            }
-        }
+        boolean isIndian = hasIndiaMarketSignal(fullText);
         if (isIndian) {
-            matchedKeywords.addAll(indianMatches.stream().limit(3).toList());
+            matchedKeywords.add("explicit India market/location phrase");
         }
 
         // 4. Relevance Score (0 - 100)
@@ -193,5 +182,19 @@ public class CategorizationService {
                 completeness,
                 String.join(", ", matchedKeywords)
         );
+    }
+
+    private boolean isNegatedIndiaSignal(String text, int matchStart) {
+        String context = text.substring(Math.max(0, matchStart - 24), matchStart);
+        return Pattern.compile("\\b(?:not|outside|excluding|except|non[- ]?)\\s*$", Pattern.CASE_INSENSITIVE)
+                .matcher(context).find();
+    }
+
+    private boolean hasIndiaMarketSignal(String text) {
+        Matcher matcher = INDIA_MARKET_SIGNAL.matcher(text);
+        while (matcher.find()) {
+            if (!isNegatedIndiaSignal(text, matcher.start())) return true;
+        }
+        return false;
     }
 }

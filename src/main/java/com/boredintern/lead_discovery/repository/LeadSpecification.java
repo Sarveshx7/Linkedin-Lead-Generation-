@@ -13,6 +13,11 @@ public class LeadSpecification {
     public static Specification<Lead> withFilters(LeadFilterRequest filter) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
+            java.time.Instant now = java.time.Instant.now();
+            java.time.Instant mandatoryCutoff = now.minus(java.time.Duration.ofDays(7));
+            predicates.add(cb.greaterThanOrEqualTo(root.get("publishedAt"), mandatoryCutoff));
+            predicates.add(cb.lessThanOrEqualTo(root.get("publishedAt"), now));
+            predicates.add(cb.isTrue(root.get("isIndianMarket")));
 
             if (filter.getQuery() != null && !filter.getQuery().isBlank()) {
                 String term = "%" + filter.getQuery().trim().toLowerCase() + "%";
@@ -34,25 +39,20 @@ public class LeadSpecification {
                 predicates.add(cb.equal(root.get("reviewStatus"), filter.getStatus()));
             }
 
-            if (filter.getIsIndian() != null) {
-                predicates.add(cb.equal(root.get("isIndianMarket"), filter.getIsIndian()));
-            }
-
             if (filter.getPlatform() != null) {
                 predicates.add(cb.equal(root.get("sourcePlatform"), filter.getPlatform()));
             }
 
             if (filter.getTimeRange() != null && !filter.getTimeRange().isBlank()) {
-                java.time.Instant now = java.time.Instant.now();
-                java.time.Instant cutoff = null;
+                java.time.Instant cutoff = mandatoryCutoff;
                 if ("24h".equalsIgnoreCase(filter.getTimeRange())) {
                     cutoff = now.minus(java.time.Duration.ofHours(24));
-                } else if ("week".equalsIgnoreCase(filter.getTimeRange()) || "7d".equalsIgnoreCase(filter.getTimeRange())) {
-                    cutoff = now.minus(java.time.Duration.ofDays(7));
-                } else if ("month".equalsIgnoreCase(filter.getTimeRange()) || "30d".equalsIgnoreCase(filter.getTimeRange())) {
-                    cutoff = now.minus(java.time.Duration.ofDays(30));
+                } else if ("week".equalsIgnoreCase(filter.getTimeRange()) || "7d".equalsIgnoreCase(filter.getTimeRange())
+                        || "month".equalsIgnoreCase(filter.getTimeRange()) || "30d".equalsIgnoreCase(filter.getTimeRange())
+                        || "all".equalsIgnoreCase(filter.getTimeRange())) {
+                    cutoff = mandatoryCutoff;
                 }
-                if (cutoff != null) {
+                if (!cutoff.equals(mandatoryCutoff)) {
                     predicates.add(cb.greaterThanOrEqualTo(root.get("publishedAt"), cutoff));
                 }
             }

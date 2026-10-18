@@ -36,7 +36,7 @@ const extractContacts = (value) => {
 
 const formatLeadDate = (value) => value
   ? new Date(value).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
-  : 'Recently discovered';
+  : 'Date unavailable';
 
 export default function LeadDiscovery() {
   const [leads, setLeads] = useState([]);
@@ -50,8 +50,7 @@ export default function LeadDiscovery() {
   const [intent, setIntent] = useState('');
   const [status, setStatus] = useState('');
   const [platform, setPlatform] = useState('LINKEDIN');
-  const [isIndian, setIsIndian] = useState(false);
-  const [timeRange, setTimeRange] = useState(''); // '24h', 'week', 'month'
+  const [timeRange, setTimeRange] = useState('week');
   const [sortBy, setSortBy] = useState('intentLevel');
   const [sortDir, setSortDir] = useState('desc');
   const [page, setPage] = useState(0);
@@ -75,7 +74,6 @@ export default function LeadDiscovery() {
         ...(intent ? { intent } : {}),
         ...(status ? { status } : {}),
         ...(platform ? { platform } : {}),
-        ...(isIndian ? { isIndian: true } : {}),
         ...(timeRange ? { timeRange } : {}),
       };
 
@@ -92,7 +90,7 @@ export default function LeadDiscovery() {
 
   useEffect(() => {
     fetchLeads();
-  }, [page, sortBy, sortDir, category, intent, status, platform, isIndian, timeRange]);
+  }, [page, sortBy, sortDir, category, intent, status, platform, timeRange]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -160,7 +158,6 @@ export default function LeadDiscovery() {
       ...(intent ? { intent } : {}),
       ...(status ? { status } : {}),
       ...(platform ? { platform } : {}),
-      ...(isIndian ? { isIndian: true } : {}),
       ...(timeRange ? { timeRange } : {}),
       sortBy,
       sortDir,
@@ -173,12 +170,11 @@ export default function LeadDiscovery() {
     setIntent('');
     setStatus('');
     setPlatform('LINKEDIN');
-    setIsIndian(false);
-    setTimeRange('');
+    setTimeRange('week');
     setPage(0);
   };
 
-  const activeFilterCount = [query, category, intent, status, platform, isIndian, timeRange].filter(Boolean).length;
+  const activeFilterCount = [query, category, intent, status, platform, timeRange !== 'week' ? timeRange : ''].filter(Boolean).length;
 
   return (
     <div className="space-y-6 animate-fadeIn">
@@ -298,10 +294,8 @@ export default function LeadDiscovery() {
             onChange={(e) => { setTimeRange(e.target.value); setPage(0); }}
             className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-emerald-500 font-medium"
           >
-            <option value="">All Time</option>
             <option value="24h">Last 24 Hours</option>
             <option value="week">Last Week (7 Days)</option>
-            <option value="month">Last 30 Days</option>
           </select>
 
           {/* Intent Level */}
@@ -355,18 +349,10 @@ export default function LeadDiscovery() {
             <option value="discoveredAt-asc">Oldest First</option>
           </select>
 
-          {/* Indian Market Toggle */}
-          <label className="flex items-center space-x-2 px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl cursor-pointer hover:border-amber-500/50 transition-colors">
-            <input
-              type="checkbox"
-              checked={isIndian}
-              onChange={(e) => { setIsIndian(e.target.checked); setPage(0); }}
-              className="rounded bg-slate-800 border-slate-700 text-amber-500 focus:ring-0"
-            />
-            <span className="text-xs font-semibold text-amber-300 truncate">
-              India Only
-            </span>
-          </label>
+          <div className="flex items-center gap-2 rounded-xl border border-amber-500/20 bg-amber-500/5 px-3 py-2 text-xs font-semibold text-amber-300" title="Only posts with explicit India-related wording are included.">
+            <MapPin className="h-4 w-4" />
+            <span>India-only results</span>
+          </div>
         </div>
 
         {/* Optional shortcuts stay collapsed so the filters remain easy to scan. */}
@@ -449,7 +435,7 @@ export default function LeadDiscovery() {
         </details>
 
         {/* Clear Filters helper */}
-        {(query || category || intent || status || platform || isIndian || timeRange) && (
+        {(query || category || intent || status || platform || (timeRange && timeRange !== 'week')) && (
           <div className="flex items-center justify-between text-xs pt-1 text-slate-400">
             <span>Filtered results active</span>
             <button
@@ -541,7 +527,7 @@ export default function LeadDiscovery() {
                     <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-slate-500">{isIndexedLinkedIn ? 'Market signal' : 'Location'}</span>
                     <div className="flex min-w-0 items-center gap-1.5 text-xs font-semibold text-slate-200">
                       <MapPin className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-                      <span className="truncate">{lead.location || (lead.isIndianMarket ? 'India match' : (isIndexedLinkedIn ? 'No India signal' : 'Not specified'))}</span>
+                      <span className="truncate">{isIndexedLinkedIn ? (lead.isIndianMarket ? 'Explicit India post signal' : 'No explicit India signal') : (lead.location || 'Not specified')}</span>
                     </div>
                   </div>
                 </div>
@@ -560,7 +546,7 @@ export default function LeadDiscovery() {
                       </a>
                     )}
                     {lead.isIndianMarket && (
-                      <span className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-2.5 py-1.5 text-xs font-semibold text-amber-300">India market</span>
+                      <span title="Inferred from explicit wording in the post; this does not verify the author’s location." className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-2.5 py-1.5 text-xs font-semibold text-amber-300">India signal</span>
                     )}
                   </div>
                 )}
@@ -623,7 +609,7 @@ export default function LeadDiscovery() {
                   <th className="py-3 px-4">Title & Requirement</th>
                   <th className="py-3 px-3">Category</th>
                   <th className="py-3 px-3">Intent</th>
-                  <th className="py-3 px-3">India</th>
+                  <th className="py-3 px-3">India signal</th>
                   <th className="py-3 px-3">Platform</th>
                   <th className="py-3 px-3">Date</th>
                   <th className="py-3 px-4 text-right">Actions</th>

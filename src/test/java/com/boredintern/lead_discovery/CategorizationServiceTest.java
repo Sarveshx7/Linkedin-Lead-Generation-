@@ -39,4 +39,17 @@ class CategorizationServiceTest {
         assertEquals(ServiceCategory.BRAND_FILM, filmResult.category());
         assertEquals(IntentLevel.HIGH, filmResult.intentLevel());
     }
+
+    @Test
+    void indiaSignalRequiresAnExplicitIndiaOrIndianLocationPhrase() {
+        CategorizationService.CategorizationResult global = categorizationService.analyze(
+                "Looking for a UGC creator", "We need a creator for a campaign. The game plan and budget are ready.",
+                "Alex", "https://linkedin.com/posts/global", null);
+        assertFalse(global.isIndianMarket(), "Loose words and a campaign budget must not imply India location");
+
+        CategorizationService.CategorizationResult india = categorizationService.analyze(
+                "Looking for a UGC creator in Bengaluru", "We need a creator for a campaign.",
+                "Asha", "https://linkedin.com/posts/india", null);
+        assertTrue(india.isIndianMarket(), "An explicit Indian city in the post is an India signal");
+    }
 }

@@ -16,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
 @Component
@@ -37,6 +39,14 @@ public class LinkedInCollector implements LeadSourceCollector {
     private static final int MAX_KEYWORDS = 12;
     private static final int MAX_EXCLUDED_KEYWORDS = 6;
     private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(20);
+    private static final Duration MAX_POST_AGE = Duration.ofDays(7);
+    private static final Pattern RELATIVE_DATE = Pattern.compile("(?i)^(\\d+)\\s+(minute|hour|day|week)s?\\s+ago$");
+    private static final List<String> INDIA_SEARCH_LOCATIONS = List.of(
+            "India", "Indian", "Mumbai", "Delhi", "Gurugram", "Gurgaon", "Noida", "Bengaluru",
+            "Bangalore", "Hyderabad", "Pune", "Chennai", "Kolkata", "Ahmedabad", "Jaipur",
+            "Kochi", "Kerala", "Goa", "Chandigarh", "Indore", "Tamil Nadu", "Karnataka",
+            "Telangana", "Andhra Pradesh"
+    );
     private static final Pattern INTENT = Pattern.compile(
             "(?i)\\b(looking for|seeking|need(?:ing)? (?:a|an|the)?|recommend(?:ation)?|anyone know|" +
                     "hiring|hire|sponsor(?:ship|ed)?|brand partnership|paid partnership|creator partnership|" +
@@ -99,6 +109,11 @@ public class LinkedInCollector implements LeadSourceCollector {
             return List.of();
         }
 
+        List<String> configuredTerms = campaignTerms(campaign);
+        if (configuredTerms.isEmpty()) {
+            logger.warn("Campaign has no search keywords. Add at least one keyword; no broad default search was run.");
+            return List.of();
+        }
         String campaignQuery = buildQuery(campaign);
         logger.info("LinkedIn search: sending the same campaign query to " + providers.size()
                 + " configured provider(s): " + providers.stream().map(Provider::name).collect(Collectors.joining(", ")) + ".");
@@ -144,8 +159,15 @@ public class LinkedInCollector implements LeadSourceCollector {
         List<String> campaignTerms = campaignTerms(campaign);
         List<RawLeadPayload> leads = new ArrayList<>();
         int discarded = 0;
+        int staleOrUndated = 0;
+        Instant now = Instant.now();
+        Instant cutoff = now.minus(MAX_POST_AGE);
         for (MatchedPost post : byUrl.values()) {
             String searchable = post.searchableText().toLowerCase(Locale.ROOT);
+            if (post.publishedAt == null || post.publishedAt.isBefore(cutoff) || post.publishedAt.isAfter(now)) {
+                staleOrUndated++;
+                continue;
+            }
             if (containsExcludedKeyword(searchable, campaign)
                     || !INTENT.matcher(searchable).find()
                     || campaignTerms.stream().noneMatch(term -> searchable.contains(term.toLowerCase(Locale.ROOT)))) {
@@ -177,7 +199,8 @@ public class LinkedInCollector implements LeadSourceCollector {
                     metadata
             ));
         }
-        logger.info("Provider comparison merged " + byUrl.size() + " exact LinkedIn posts; filtered out " + discarded
+        logger.info("Provider comparison merged " + byUrl.size() + " exact LinkedIn posts; excluded " + staleOrUndated
+                + " with missing, older-than-7-days, or future provider dates and filtered out " + discarded
                 + " weak, excluded, or non-campaign matches; " + leads.size() + " lead(s) passed qualification.");
         return leads;
     }
@@ -200,6 +223,8 @@ public class LinkedInCollector implements LeadSourceCollector {
                             "include_domains", List.of("linkedin.com"), "include_answer", false));
             case "Exa" -> jsonPost("https://api.exa.ai/search", provider.apiKey(), "x-api-key", "",
                     Map.of("query", query, "type", "auto", "numResults", MAX_RESULTS_PER_PROVIDER,
+                            "startPublishedDate", Instant.now().minus(MAX_POST_AGE).toString(),
+                            "endPublishedDate", Instant.now().toString(),
                             "includeDomains", List.of("linkedin.com"),
                             "contents", Map.of("highlights", true)));
             case "Serper" -> jsonPost("https://google.serper.dev/search", provider.apiKey(), "X-API-KEY", "",
@@ -281,7 +306,8 @@ public class LinkedInCollector implements LeadSourceCollector {
                 .map(LinkedInCollector::quote).toList();
         StringBuilder query = new StringBuilder(
                 "(site:linkedin.com/posts OR site:linkedin.com/feed/update) ("
-        ).append(String.join(" OR ", included)).append(')');
+        ).append(String.join(" OR ", included)).append(") ("
+        ).append(INDIA_SEARCH_LOCATIONS.stream().map(LinkedInCollector::quote).collect(Collectors.joining(" OR "))).append(')');
         if (campaign != null && hasText(campaign.getExcludedKeywords())) {
             List<String> excluded = splitTerms(campaign.getExcludedKeywords()).stream()
                     .limit(MAX_EXCLUDED_KEYWORDS).map(term -> "-" + quote(term)).toList();
@@ -294,35 +320,10 @@ public class LinkedInCollector implements LeadSourceCollector {
 
     private List<String> campaignTerms(Campaign campaign) {
         LinkedHashSet<String> terms = new LinkedHashSet<>();
-        addCategoryDefaults(terms, campaign);
         if (campaign != null) {
             addTerms(terms, campaign.getKeywords());
         }
-        if (terms.isEmpty()) {
-            terms.addAll(List.of("content creator", "influencer", "brand collab", "creator partnership",
-                    "looking for an advertising agency", "creative agency RFP"));
-        }
         return terms.stream().limit(MAX_KEYWORDS).toList();
-    }
-
-    private void addCategoryDefaults(Set<String> terms, Campaign campaign) {
-        if (campaign == null || campaign.getName() == null) return;
-        String name = campaign.getName().toLowerCase(Locale.ROOT);
-        if (name.contains("influencer") || name.contains("creator") || name.contains("collab")
-                || name.contains("social media") || name.contains("ugc") || name.contains("ambassador")) {
-            terms.addAll(List.of("looking for a content creator", "looking for content creators",
-                    "looking for an influencer", "looking for influencers", "brand collab",
-                    "creator partnership", "UGC creator", "social media creator"));
-        } else if (name.contains("advertising") || name.contains("creative") || name.contains("marketing")) {
-            terms.addAll(List.of("looking for an advertising agency", "looking for a creative agency",
-                    "social media advertising", "advertising campaign", "brand campaign", "creative agency RFP"));
-        } else if (name.contains("production")) {
-            terms.addAll(List.of("looking for a production house", "video production team", "commercial shoot",
-                    "brand video production", "product shoot", "production partner"));
-        } else if (name.contains("brand film")) {
-            terms.addAll(List.of("brand film RFP", "looking for a brand film agency", "corporate film",
-                    "product commercial", "brand video campaign", "TVC production"));
-        }
     }
 
     private void addTerms(Set<String> output, String rawTerms) {
@@ -376,9 +377,25 @@ public class LinkedInCollector implements LeadSourceCollector {
 
     private Instant parsePublishedAt(String value) {
         if (!hasText(value)) return null;
-        try { return Instant.parse(value.trim()); } catch (DateTimeParseException ignored) { }
-        try { return OffsetDateTime.parse(value.trim()).toInstant(); } catch (DateTimeParseException ignored) { }
-        try { return LocalDate.parse(value.trim()).atStartOfDay().toInstant(java.time.ZoneOffset.UTC); }
+        String normalized = value.trim();
+        Instant now = Instant.now();
+        if (normalized.equalsIgnoreCase("today")) return now;
+        if (normalized.equalsIgnoreCase("yesterday")) return now.minus(1, ChronoUnit.DAYS);
+        Matcher relative = RELATIVE_DATE.matcher(normalized);
+        if (relative.matches()) {
+            long amount;
+            try { amount = Long.parseLong(relative.group(1)); } catch (NumberFormatException ignored) { return null; }
+            return switch (relative.group(2).toLowerCase(Locale.ROOT)) {
+                case "minute" -> now.minus(amount, ChronoUnit.MINUTES);
+                case "hour" -> now.minus(amount, ChronoUnit.HOURS);
+                case "day" -> now.minus(amount, ChronoUnit.DAYS);
+                case "week" -> now.minus(amount, ChronoUnit.WEEKS);
+                default -> null;
+            };
+        }
+        try { return Instant.parse(normalized); } catch (DateTimeParseException ignored) { }
+        try { return OffsetDateTime.parse(normalized).toInstant(); } catch (DateTimeParseException ignored) { }
+        try { return LocalDate.parse(normalized).atStartOfDay().toInstant(java.time.ZoneOffset.UTC); }
         catch (DateTimeParseException ignored) { return null; }
     }
 
@@ -470,7 +487,9 @@ public class LinkedInCollector implements LeadSourceCollector {
             if (!hasText(author)) author = candidate.author();
             if (!hasText(authorProfileUrl)) authorProfileUrl = candidate.authorProfileUrl();
             if (!hasText(company)) company = candidate.company();
-            if (publishedAt == null) publishedAt = candidate.publishedAt();
+            if (candidate.publishedAt() != null && (publishedAt == null || candidate.publishedAt().isBefore(publishedAt))) {
+                publishedAt = candidate.publishedAt();
+            }
         }
 
         private String searchableText() {
