@@ -298,7 +298,7 @@ export default function CampaignManager({ onTriggerRun }) {
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-slate-200 focus:outline-none focus:border-emerald-500"
                 />
                 <span className="text-[10px] text-slate-400 block mt-1">
-                  Only these keywords are searched; there are no hidden campaign-type keywords. Results also need an explicit India signal and a provider date within seven days.
+                  Only these keywords are searched; there are no hidden campaign-type keywords. Results need an explicit India signal. Older posts and results without a provider date are allowed.
                 </span>
               </div>
 

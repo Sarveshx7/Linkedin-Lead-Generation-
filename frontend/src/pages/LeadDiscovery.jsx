@@ -50,7 +50,6 @@ export default function LeadDiscovery() {
   const [intent, setIntent] = useState('');
   const [status, setStatus] = useState('');
   const [platform, setPlatform] = useState('LINKEDIN');
-  const [timeRange, setTimeRange] = useState('week');
   const [sortBy, setSortBy] = useState('intentLevel');
   const [sortDir, setSortDir] = useState('desc');
   const [page, setPage] = useState(0);
@@ -74,7 +73,6 @@ export default function LeadDiscovery() {
         ...(intent ? { intent } : {}),
         ...(status ? { status } : {}),
         ...(platform ? { platform } : {}),
-        ...(timeRange ? { timeRange } : {}),
       };
 
       const data = await getLeads(params);
@@ -90,7 +88,7 @@ export default function LeadDiscovery() {
 
   useEffect(() => {
     fetchLeads();
-  }, [page, sortBy, sortDir, category, intent, status, platform, timeRange]);
+  }, [page, sortBy, sortDir, category, intent, status, platform]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -158,7 +156,6 @@ export default function LeadDiscovery() {
       ...(intent ? { intent } : {}),
       ...(status ? { status } : {}),
       ...(platform ? { platform } : {}),
-      ...(timeRange ? { timeRange } : {}),
       sortBy,
       sortDir,
     });
@@ -170,11 +167,10 @@ export default function LeadDiscovery() {
     setIntent('');
     setStatus('');
     setPlatform('LINKEDIN');
-    setTimeRange('week');
     setPage(0);
   };
 
-  const activeFilterCount = [query, category, intent, status, platform, timeRange !== 'week' ? timeRange : ''].filter(Boolean).length;
+  const activeFilterCount = [query, category, intent, status, platform].filter(Boolean).length;
 
   return (
     <div className="space-y-6 animate-fadeIn">
@@ -288,16 +284,6 @@ export default function LeadDiscovery() {
             <option value="OTHER">Other Services</option>
           </select>
 
-          {/* Time Range */}
-          <select
-            value={timeRange}
-            onChange={(e) => { setTimeRange(e.target.value); setPage(0); }}
-            className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-emerald-500 font-medium"
-          >
-            <option value="24h">Last 24 Hours</option>
-            <option value="week">Last Week (7 Days)</option>
-          </select>
-
           {/* Intent Level */}
           <select
             value={intent}
@@ -367,75 +353,75 @@ export default function LeadDiscovery() {
           <div className="mt-3 flex flex-wrap items-center gap-2">
 
           <a
-            href={`https://www.linkedin.com/search/results/content/?keywords=${encodeURIComponent('"influencer marketing"')}&origin=GLOBAL_SEARCH_HEADER&sortBy=%22date_posted%22&datePosted=%22past-24h%22`}
+            href={`https://www.linkedin.com/search/results/content/?keywords=${encodeURIComponent('"influencer marketing"')}&origin=GLOBAL_SEARCH_HEADER`}
             target="_blank"
             rel="noopener noreferrer"
             className="px-2.5 py-1 rounded-lg bg-sky-950/40 hover:bg-sky-900/60 border border-sky-500/30 text-sky-300 text-[11px] font-semibold flex items-center space-x-1 transition-all"
-            title="Open live LinkedIn posts from past 24 hours for influencer marketing"
+            title="Search LinkedIn for influencer marketing posts"
           >
-            <span>Influencer (24h)</span>
+            <span>Influencer Marketing</span>
             <ExternalLink className="w-3 h-3" />
           </a>
 
           <a
-            href={`https://www.linkedin.com/search/results/content/?keywords=${encodeURIComponent('"production house"')}&origin=GLOBAL_SEARCH_HEADER&sortBy=%22date_posted%22&datePosted=%22past-24h%22`}
+            href={`https://www.linkedin.com/search/results/content/?keywords=${encodeURIComponent('"production house"')}&origin=GLOBAL_SEARCH_HEADER`}
             target="_blank"
             rel="noopener noreferrer"
             className="px-2.5 py-1 rounded-lg bg-sky-950/40 hover:bg-sky-900/60 border border-sky-500/30 text-sky-300 text-[11px] font-semibold flex items-center space-x-1 transition-all"
-            title="Open live LinkedIn posts from past 24 hours for production houses"
+            title="Search LinkedIn for production house posts"
           >
-            <span>Production House (24h)</span>
+            <span>Production House</span>
             <ExternalLink className="w-3 h-3" />
           </a>
 
           <a
-            href={`https://www.linkedin.com/search/results/content/?keywords=${encodeURIComponent('"advertising agency"')}&origin=GLOBAL_SEARCH_HEADER&sortBy=%22date_posted%22&datePosted=%22past-24h%22`}
+            href={`https://www.linkedin.com/search/results/content/?keywords=${encodeURIComponent('"advertising agency"')}&origin=GLOBAL_SEARCH_HEADER`}
             target="_blank"
             rel="noopener noreferrer"
             className="px-2.5 py-1 rounded-lg bg-sky-950/40 hover:bg-sky-900/60 border border-sky-500/30 text-sky-300 text-[11px] font-semibold flex items-center space-x-1 transition-all"
-            title="Open live LinkedIn posts from past 24 hours for advertising agencies"
+            title="Search LinkedIn for advertising agency posts"
           >
-            <span>Advertising (24h)</span>
+            <span>Advertising</span>
             <ExternalLink className="w-3 h-3" />
           </a>
 
           <a
-            href={`https://www.linkedin.com/search/results/content/?keywords=${encodeURIComponent('"brand film"')}&origin=GLOBAL_SEARCH_HEADER&sortBy=%22date_posted%22&datePosted=%22past-24h%22`}
+            href={`https://www.linkedin.com/search/results/content/?keywords=${encodeURIComponent('"brand film"')}&origin=GLOBAL_SEARCH_HEADER`}
             target="_blank"
             rel="noopener noreferrer"
             className="px-2.5 py-1 rounded-lg bg-sky-950/40 hover:bg-sky-900/60 border border-sky-500/30 text-sky-300 text-[11px] font-semibold flex items-center space-x-1 transition-all"
-            title="Open live LinkedIn posts from past 24 hours for brand films"
+            title="Search LinkedIn for brand film posts"
           >
-            <span>Brand Film (24h)</span>
+            <span>Brand Film</span>
             <ExternalLink className="w-3 h-3" />
           </a>
 
           <a
-            href={`https://www.linkedin.com/search/results/content/?keywords=${encodeURIComponent('"brand film"')}&origin=GLOBAL_SEARCH_HEADER&sortBy=%22date_posted%22&datePosted=%22past-week%22`}
+            href={`https://www.linkedin.com/search/results/content/?keywords=${encodeURIComponent('"brand sponsorship" OR "creator collaboration"')}&origin=GLOBAL_SEARCH_HEADER`}
             target="_blank"
             rel="noopener noreferrer"
             className="px-2.5 py-1 rounded-lg bg-indigo-950/40 hover:bg-indigo-900/60 border border-indigo-500/30 text-indigo-300 text-[11px] font-semibold flex items-center space-x-1 transition-all"
-            title="Open live LinkedIn posts from past week for brand films"
+            title="Search LinkedIn for brand sponsorship and creator collaboration posts"
           >
-            <span>Brand Film (Week)</span>
+            <span>Brand Sponsorship</span>
             <ExternalLink className="w-3 h-3" />
           </a>
 
           <a
-            href={`https://www.linkedin.com/search/results/content/?keywords=${encodeURIComponent('("influencer marketing" OR "production house" OR "advertising agency" OR "brand film")')}&origin=GLOBAL_SEARCH_HEADER&sortBy=%22date_posted%22&datePosted=%22past-week%22`}
+            href={`https://www.linkedin.com/search/results/content/?keywords=${encodeURIComponent('("influencer marketing" OR "production house" OR "advertising agency" OR "brand film")')}&origin=GLOBAL_SEARCH_HEADER`}
             target="_blank"
             rel="noopener noreferrer"
             className="px-2.5 py-1 rounded-lg bg-emerald-950/40 hover:bg-emerald-900/60 border border-emerald-500/30 text-emerald-300 text-[11px] font-semibold flex items-center space-x-1 transition-all ml-auto"
-            title="Open live LinkedIn posts from past week across all 4 target categories"
+            title="Search LinkedIn across all 4 target categories"
           >
-            <span>All 4 Categories (Past Week)</span>
+            <span>All 4 Categories</span>
             <ExternalLink className="w-3 h-3" />
           </a>
           </div>
         </details>
 
         {/* Clear Filters helper */}
-        {(query || category || intent || status || platform || (timeRange && timeRange !== 'week')) && (
+        {(query || category || intent || status || platform) && (
           <div className="flex items-center justify-between text-xs pt-1 text-slate-400">
             <span>Filtered results active</span>
             <button
@@ -458,7 +444,7 @@ export default function LeadDiscovery() {
         <div className="p-12 text-center rounded-2xl glass-card border border-slate-800 space-y-3">
           <p className="text-slate-300 font-semibold">No matching leads found</p>
           <p className="text-xs text-slate-400 max-w-md mx-auto">
-            Try adjusting your search filters or click "Collect Leads" to ingest fresh posts from active channels.
+            Try adjusting your search filters or click "Collect Leads" to search the active providers again.
           </p>
         </div>
       ) : viewMode === 'grid' ? (

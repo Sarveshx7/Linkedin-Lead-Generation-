@@ -26,13 +26,13 @@ public class LeadCollectionService {
 
     private static final Map<String, String> DEFAULT_LINKEDIN_KEYWORDS = Map.of(
             "LinkedIn: Influencer Marketing Leads",
-            "looking for a content creator, looking for content creators, looking for an influencer, looking for influencers, brand collab, creator partnership, social media creator, paid partnership, sponsored content, brand ambassador, influencer campaign",
+            "influencer, influencers, content creator, content creators, UGC, creator collaboration, brand collaboration, brand sponsorship, brand ambassador, sponsored content, paid partnership, product launch",
             "LinkedIn: Advertising & Creative Leads",
-            "looking for an advertising agency, looking for a creative agency, social media advertising, advertising campaign, brand campaign, creative agency RFP, digital marketing agency, paid media campaign, campaign partner, brand collaboration, promotional campaign, pitch invited",
+            "advertising agency, creative agency, social media campaign, digital marketing agency, marketing agency, brand campaign, campaign partner, marketing RFP, advertising campaign, media buying, promotional campaign, brand collaboration",
             "LinkedIn: Production House Leads",
-            "looking for a production house, video production team, commercial shoot, brand video production, product shoot, production partner, corporate video production, product photography, ad film production, branded content production, videographer, shoot team",
+            "production house, video production, brand video, product video, commercial shoot, product shoot, video production team, corporate film, ad film, videographer, production partner, content production",
             "LinkedIn: Brand Film Leads",
-            "brand film RFP, looking for a brand film agency, corporate film, product commercial, brand video campaign, TVC production, company profile film, storytelling campaign, ad film, video production partner, product film, brand content"
+            "brand film, corporate film, product commercial, brand video, ad film, TVC, video campaign, storytelling campaign, company profile video, product film, production house, creative team"
     );
 
     private static final Map<String, String> LEGACY_LINKEDIN_KEYWORDS = Map.of(

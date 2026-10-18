@@ -194,13 +194,13 @@ export default function Dashboard({ stats, systemStatus, onNavigate, onTriggerRu
         {/* Total Leads */}
         <div className="p-3 sm:p-5 rounded-2xl glass-card border border-slate-800 space-y-2 hover:border-slate-700 transition-all">
           <div className="flex items-center justify-between text-slate-400">
-            <span className="text-xs font-semibold uppercase tracking-wider">Fresh Leads · 7 Days</span>
+            <span className="text-xs font-semibold uppercase tracking-wider">Qualified Leads · India signal</span>
             <Users className="w-4 h-4 text-emerald-400" />
           </div>
           <div className="text-2xl sm:text-3xl font-extrabold text-white">
             <CountUp value={totalLeads} />
           </div>
-          <p className="text-[11px] text-slate-400">Posts with a provider-reported date</p>
+          <p className="text-[11px] text-slate-400">All matching posts; dates shown when providers supply them</p>
         </div>
 
         {/* High Intent */}

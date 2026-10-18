@@ -17,7 +17,7 @@ public class LeadFilterRequest {
     private int size = 20;
     private String sortBy = "discoveredAt";
     private String sortDir = "desc";
-    private String timeRange; // "24h", "week", "month", "all"
+    private String timeRange; // retained for API compatibility; publication dates are not filtered
 
     public LeadFilterRequest() {
     }

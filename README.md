@@ -8,7 +8,7 @@ LeadForge is a campaign-based lead discovery dashboard by TheBoredMonkey. Its Li
 
 1. Builds a query only from the selected campaign's configured keywords and exclusions, plus an India/geography requirement. No hidden category defaults or fallback search terms are added.
 2. Sends that query to each configured provider in parallel.
-3. Keeps only exact LinkedIn post permalinks, merges duplicates, and requires a provider-reported publication date within the previous seven days, an explicit India-related location/market signal in the returned post text, a configured campaign keyword, and a commercial-intent phrase. Undated, stale, future-dated, and non-India-signaled results are excluded.
+3. Keeps exact LinkedIn post permalinks, merges duplicates, and requires an explicit India-related location/market signal in the returned post text, a configured campaign keyword, and a commercial-intent phrase. There is no publication-date cutoff; older and undated provider results can be included. Clearly future-dated results are excluded.
 4. Assigns a service category and intent score, extracts possible email/phone strings from returned text, and saves the result and provider metadata.
 5. The dashboard shows the source permalink, provider-returned text, any provider-supplied fields, and the app's own classification.
 

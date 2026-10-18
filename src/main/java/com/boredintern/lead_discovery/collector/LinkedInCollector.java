@@ -39,7 +39,6 @@ public class LinkedInCollector implements LeadSourceCollector {
     private static final int MAX_KEYWORDS = 12;
     private static final int MAX_EXCLUDED_KEYWORDS = 6;
     private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(20);
-    private static final Duration MAX_POST_AGE = Duration.ofDays(7);
     private static final Pattern RELATIVE_DATE = Pattern.compile("(?i)^(\\d+)\\s+(minute|hour|day|week)s?\\s+ago$");
     private static final List<String> INDIA_SEARCH_LOCATIONS = List.of(
             "India", "Indian", "Mumbai", "Delhi", "Gurugram", "Gurgaon", "Noida", "Bengaluru",
@@ -159,13 +158,11 @@ public class LinkedInCollector implements LeadSourceCollector {
         List<String> campaignTerms = campaignTerms(campaign);
         List<RawLeadPayload> leads = new ArrayList<>();
         int discarded = 0;
-        int staleOrUndated = 0;
         Instant now = Instant.now();
-        Instant cutoff = now.minus(MAX_POST_AGE);
         for (MatchedPost post : byUrl.values()) {
             String searchable = post.searchableText().toLowerCase(Locale.ROOT);
-            if (post.publishedAt == null || post.publishedAt.isBefore(cutoff) || post.publishedAt.isAfter(now)) {
-                staleOrUndated++;
+            // Keep historical or undated provider results; only reject impossible future dates.
+            if (post.publishedAt != null && post.publishedAt.isAfter(now)) {
                 continue;
             }
             if (containsExcludedKeyword(searchable, campaign)
@@ -199,8 +196,7 @@ public class LinkedInCollector implements LeadSourceCollector {
                     metadata
             ));
         }
-        logger.info("Provider comparison merged " + byUrl.size() + " exact LinkedIn posts; excluded " + staleOrUndated
-                + " with missing, older-than-7-days, or future provider dates and filtered out " + discarded
+        logger.info("Provider comparison merged " + byUrl.size() + " exact LinkedIn posts; filtered out " + discarded
                 + " weak, excluded, or non-campaign matches; " + leads.size() + " lead(s) passed qualification.");
         return leads;
     }
@@ -223,8 +219,6 @@ public class LinkedInCollector implements LeadSourceCollector {
                             "include_domains", List.of("linkedin.com"), "include_answer", false));
             case "Exa" -> jsonPost("https://api.exa.ai/search", provider.apiKey(), "x-api-key", "",
                     Map.of("query", query, "type", "auto", "numResults", MAX_RESULTS_PER_PROVIDER,
-                            "startPublishedDate", Instant.now().minus(MAX_POST_AGE).toString(),
-                            "endPublishedDate", Instant.now().toString(),
                             "includeDomains", List.of("linkedin.com"),
                             "contents", Map.of("highlights", true)));
             case "Serper" -> jsonPost("https://google.serper.dev/search", provider.apiKey(), "X-API-KEY", "",
@@ -389,7 +383,8 @@ public class LinkedInCollector implements LeadSourceCollector {
                 case "minute" -> now.minus(amount, ChronoUnit.MINUTES);
                 case "hour" -> now.minus(amount, ChronoUnit.HOURS);
                 case "day" -> now.minus(amount, ChronoUnit.DAYS);
-                case "week" -> now.minus(amount, ChronoUnit.WEEKS);
+                // Instant does not support ChronoUnit.WEEKS directly.
+                case "week" -> now.minus(Math.multiplyExact(amount, 7), ChronoUnit.DAYS);
                 default -> null;
             };
         }
