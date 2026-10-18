@@ -6,9 +6,9 @@ LeadForge is a campaign-based lead discovery dashboard by TheBoredMonkey. Its Li
 
 ## What the LinkedIn collector does
 
-1. Builds a query from category-specific defaults, the selected campaign's custom keywords, and exclusions. Creator/collaboration campaigns target brands seeking creators, influencers, UGC, and paid partnerships; advertising campaigns target agency, social campaign, and creative partner opportunities.
+1. Builds a query only from the selected campaign's configured keywords and exclusions, plus an India/geography requirement. No hidden category defaults or fallback search terms are added.
 2. Sends that query to each configured provider in parallel.
-3. Keeps only provider results whose URL matches a LinkedIn post permalink pattern, merges exact duplicate URLs, and filters by campaign terms, exclusions, and commercial-intent phrases.
+3. Keeps only exact LinkedIn post permalinks, merges duplicates, and requires a provider-reported publication date within the previous seven days, an explicit India-related location/market signal in the returned post text, a configured campaign keyword, and a commercial-intent phrase. Undated, stale, future-dated, and non-India-signaled results are excluded.
 4. Assigns a service category and intent score, extracts possible email/phone strings from returned text, and saves the result and provider metadata.
 5. The dashboard shows the source permalink, provider-returned text, any provider-supplied fields, and the app's own classification.
 
@@ -17,9 +17,10 @@ This is public-index discovery, not a LinkedIn integration. The collector does n
 ## Data quality and field provenance
 
 - **Title, result text, permalink, and date:** returned by a configured search provider. The result text may be an excerpt, highlight, or title fallback; it is not a verified full post.
+- **Recency:** the seven-day rule uses the date reported by the search provider. Search-index dates can be delayed or wrong, so the filter cannot independently verify the original LinkedIn publication timestamp.
 - **Author:** retained only when the provider returns a structured author value. The app no longer guesses a person's name from a title.
 - **Organization and location:** the current LinkedIn provider adapters do not populate these fields. They remain empty unless a future authorized source supplies them.
-- **India market signal:** inferred by the app from result text; it is not a location supplied by LinkedIn or the search provider.
+- **India market signal:** requires explicit India-related wording or an Indian city/state location phrase in returned result text. It is still an inference and does not verify the author's physical location.
 - **Email and phone:** regex matches found in provider-returned text. They may be incomplete or unrelated; verify before use.
 - **Category, intent, relevance, and completeness:** app-generated classifications based on the returned title/text and available fields. Provider overlap records which search services returned the same URL; overlap does not verify the post's claims.
 
