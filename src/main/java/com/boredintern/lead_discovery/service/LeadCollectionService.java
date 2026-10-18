@@ -140,8 +140,6 @@ public class LeadCollectionService {
                 .anyMatch(c -> c.getName() != null && c.getName().contains("LinkedIn"));
 
         if (!hasLinkedIn) {
-            campaignRepository.deleteAll(); // Clean up old tech campaigns
-
             Campaign c1 = new Campaign();
             c1.setName("LinkedIn: Influencer Marketing Leads");
             c1.setDescription("Brand and company posts seeking social creators, influencers, UGC, or paid collaboration partners.");
